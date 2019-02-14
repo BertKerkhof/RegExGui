@@ -1,0 +1,52 @@
+﻿Regular Expressions (RegEx) voor beginners
+
+Meer en meer informatie komt beschikbaar, veelal in digitaal leesbare formaten. Dat maakt het vinden van hetgeen precies nodig is, niet gemakkelijker. Het kan zo moeilijk zijn als het vinden van spelden in de bekende hooiberg. De vorm waarin informatie elementen liggen verscholen, staat dikwijls direct importeren in uw eigen apps's in de weg.
+
+Dan kan kennis van patroon-herkennen een brug zijn naar succes. Er is een standaard voor de beroepspraktijk van informatieverwerken. Die is sinds de 80s gegroeid wat betreft praktische bruikbaarheid. De naam is “regular expressions”, kortweg: RegEx.
+
+De standaard is geïmplementeerd in de meeste programmeer pakketten zoals Java, Python, Ruby en PHP. Een toegankelijk versie is bovendien in het publiekspakket AutoIT. Daarnaast verschijnen Regex zoekboxen meer en meer in consumenten systemen, bedoeld voor niet-programmeurs. Het valt pas op wanneer je ermee werken kunt.
+
+De syntaxis lijkt weinig op wat velen gewend zijn van computeren, soms kan een drempel worden ervaren. Vandaag presenteer ik een programma RegExGui voor het testen van regular expressies. Het is bedoeld ter vervanging van een eerdere versie die is gedistribueerd samen met het Windows programmeerpakket AutoIT3. Na installatie van dit pakket, is de eerdere versie te vinden met de naam StringRegExpGui in de \Examples\Helpfile folder. 
+
+Het vandaag gepubliceerde RegExGui is een totale remake en biedt de volgende verbeteringen:
+
+Voorbeelden
+Ingebouwd en instant met een menu oproepbaar, zijn zes instructieve toepassingen voor het vinden van namen, telefoonnummers, datums en dergelijken. De directe en snelle  werking stelt de gebruiker in staat tot het nemen van het voortouw in het nog onvldoende beoefende vak van patroon herkennen. Dank FritsW.
+
+Doortastend
+Alle voorbeelden starten met meerdere vondsten die passen bij het opgegeven patroon. Bovendien wordt elke match direct getoond en ontleedt in onderdelen. Dit in tegenstelling tot software die begint met een enkele match of slechts de constatering dat een match heeft plaatsgevonden. Met de directe benadering springt de beginner als het ware meteen in het diepe en kan het voorbeeld naar wens vereenvoudigen. Deze diepgang met RegExpGui geeft de beste voorbereiding op praktisch gebruik. 
+
+Gebruikersvriendelijk
+Op het beeldscherm is een liniaal met nummers, waardoor een onverhoopte fout bij het vervaardigen van een patroon nu sneller verholpen is.
+
+Toegevoegd zijn een aantal tooltips.
+
+Naar believen, kan de gebruiker de voorbeeld patronen aanpassen en/of opslaan.
+
+Groei
+In de voorbeelden zijn links opgenomen naar sites die geavanceerde regular expressies uitleggen of hulpmiddelen bieden. Verder een link naar een site voor gezonde voeding. Dank JolandeS. 
+
+De breedte van het dialoog-raam van het programma is aanpasbaar. Naarmate patronen beter worden beheerst, wil de gebruiker mogelijk door naar lange expressies. Die kunnen dan geheel in beeld blijven. Dank Melba23.
+
+Presentatie
+Meervoudige resulaten worden op twee-dimensionale wijze gepresenteerd. Elke match aan het begin van een regel, optionele ontleding van onderdelen in volgende kolommen. Daardoor blijft een match voortaan onderscheiden van een onderdeel dat bij een andere match hoort.
+
+Het programma is nu voorzien van een 256bits icoon met alpha transparantie.
+
+Helder
+Bij de resultaten wordt tekstuele uitleg gegeven.
+
+De limoen-groene achtergrond kleur is gekozen voor het status veld. Hiermee is het contrast verbeterd. Dank EmileR.
+
+Reparatie van fouten
+Een diagnose is nu gesteld wat betreft de verwisseling van detail- met primaire match gegevens in de resultaten, bij het gebruik van de opties Match en Alle matches. Totdat het gerepareerd is, kunnen gebruikers zich behelpen met de opties Match+detail en Ales Matches+details.
+
+Een bug in StringRegExpGui - het onverhoeds verdwijnen van alle bewaarde patronen - is verholpen. Met RegExGUi blijven de patronen bewaard in de inifile in dezelfde folder als het RegExGui programma. Dank LeaB.
+  
+Gelukkig
+Weinig gebruikers zijn zich bewust van de onzichtbaar verschillende coderingen van het alfabet die onder water in tekstbestanden schuilgaan. Sinds het nieuwe millennium groeit het gebruik van unicode, het levert vele voordelen. Her en der zijn nog 8bits coderingen. Die doorkruisten in het verleden het zoeken en vooral het vinden. Ook weer zonder dat gebruikers dit wisten, zij hebben slechts vruchteloosheid ervaren. Het hier gepresenteerde RegExGui ontlast de gebruiker wat dat betreft in het geheel. Het programma neemt zorg over naar aanleiding van coderingen en komt altijd met de meest volledige resultaten die bij uw patroon passen, dank DominiqueH.
+
+Efficiënte code
+Ten opzichte van het StringRegExpGui is de broncode van RegExGui korter. 
+
+Bert Kerkhof, analist en programmeur

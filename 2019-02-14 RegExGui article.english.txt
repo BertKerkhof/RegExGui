@@ -1,0 +1,52 @@
+﻿Regular Expressions (RegEx) for beginners
+
+More and more information is available, mostly in digitally readable formats. That makes it difficult to find exactly what is needed. It can be as difficult as finding pins in the famous haystack. The form in which information elements are hidden often prevents direct import into your own apps.
+
+Then knowledge of pattern recognition can be a bridge to success. There is a standard for the professional practice of information processing. It has grown since the 80s in terms of practicality. The name is "regular expressions", in short: RegEx.
+
+The standard is implemented in most programming packages such as Java, Python, Ruby and PHP. An accessible version is also included in the public package AutoIT. In addition, Regex search boxes appear more and more in consumer systems, intended for non-programmers. It is noticeable when you can work with it.
+
+The syntax is not very similar to what many people are used to with computers, sometimes a threshold can be experienced. Today I present a program RegExGui for testing regular expressions. It is intended to replace an earlier version that has been distributed together with the Windows programming package AutoIT3. After installing this package, the earlier version can be found with the name StringRegExpGui in the \ Examples \ Helpfile folder.
+
+The RegExGui published today is a total remake and offers the following improvements:
+
+Examples
+Built-in and instant accessible with a menu, there are six instructional applications for finding names, phone numbers, dates, and the like. The direct and fast operation allows the user to take the lead in recognizing the pattern of pattern that has not yet been practiced. Thanks FritsW.
+
+Daring
+Start all examples with multiple finds that match the specified pattern. In addition, each match is immediately shown and dissected into parts. This is in contrast to software that starts with a single match or just the observation that a match has taken place. With the direct approach, the beginner jumps straight into the deep and can simplify the example as desired. This depth with RegExpGui gives the best preparation for practical use.
+
+User-friendly
+On the screen is a ruler with numbers, so that an unexpected error in the manufacture of a pattern is now more quickly solved.
+
+Added are a number of tooltips.
+
+At will, the user can adjust and / or save the sample patterns.
+
+Growth
+The examples include links to sites that explain advanced regular expressions or provide tools. Furthermore, a link to a site for healthy food. Thanks JolandeS.
+
+The width of the dialog window of the program is adjustable. As patterns are better controlled, the user may want to go to long expressions. They can then remain completely in the picture. Thanks Melba23.
+
+Presentation
+Multiple results are presented in a two-dimensional way. Each match at the beginning of a line, optional decomposition of components in subsequent columns. As a result, a match will continue to be distinguished from a part that belongs to another match.
+
+The program now has a 256-bit icon with alpha transparency.
+
+Bright
+Textual explanations are given with the results.
+
+The lime-green background color is chosen for the status field. This improves the contrast. Thanks EmileR.
+
+Repair of errors
+A diagnosis has now been made regarding the exchange of detail - with primary match data in the results, when using the options Match and All matches. Until it is repaired, users can use the Match + detail and Ales Matches + details options.
+
+A bug in StringRegExpGui - the unexpected disappearance of all saved patterns - has been fixed. With RegExGUi, the patterns remain in the inifile in the same folder as the RegExGui program. Thank LeaB.
+  
+Happy
+Few users are aware of the invisibly different codings of the alphabet hidden under water in text files. Since the new millennium the use of unicode has been growing, it has many advantages. Here and there are 8 bit codings. They traversed searching in the past and especially finding it. Again without users knowing this, they have only experienced fruitlessness. The RegExGui presented here relieves the user for that matter in the whole. The program takes care of encoding and always comes up with the most complete results that fit your pattern, thanks DominiqueH.
+
+Efficient coding
+Compared to the StringRegExpGui, the source code of RegExGui is shorter.
+
+Bert Kerkhof, analyst and programmer
