@@ -19,7 +19,7 @@
 ; (1) ComboBox contents save error repaired. Thanks LeaB
 ; (2) Added menu with six pattern examples. Thanks FritsW
 ; (3) Adjustable window width facilitates long patterns. Thanks Melba23
-; (4) Ruler points to faulty pattern if any
+; (4) Ruler for pointing to faulty pattern (if any)
 ; (5) Added tooltips
 ; (6) Two-dim presentation of result data
 ; (7) Added textual explanation of results
@@ -43,19 +43,13 @@
 #include <GuiTab.au3>
 #include <GuiComboBox.au3>
 
-Global $FileBox, $EditBox, $PatBox, $OffsetBox, $R0, $R1, $R2, $R3, $R4, $FileDisp
+Global $FileBox, $EditBox, $PatBox, $OffsetBox, $aRadio[5], $FileDisp
 Global $ErrDisp, $ExtDisp, $OutDisp, $TimDisp, $StatDisp, $idTab
 Global Const $minW = 550, $minH = 620
-Global $0Title = "Logical match", $1Title = "Match", $2Title = "Match + detail"
-Global $3Title = "All matches", $4Title = "All matches + details"
-Global $0Returns = "Returns a logical value", $1Returns = "Returns single array"
-Global $3Returns = "Returns array of array"
-Global $0Contains = "indicating whether there is a match"
-Global $1Contains = "that in first element should contain the full match"
-Global $2Contains = "that in first element contains the full match"
-Global $2Parts = "and in subsequent elements the requested string parts (Perl/PHP style)"
+Global $aOption[5] = ["Logical match", "Match", "Match + detail", "All matches", "All matches + details"]
+Global $aReturns[5], $aContains[5]
 
-Func WM_GETMINMAXINFO($hwnd, $Msg, $wParam, $lParam) ; Ensure min gui size
+Func WM_GETMINMAXINFO($hwnd, $Msg, $wParam, $lParam) ; Ensure min gui size. Thanks Melba23
 	Local $tMax = DllStructCreate("int;int;int;int;int;int;int;int;int;int", $lParam)
 	DllStructSetData($tMax, 7, $minW + 14)
 	DllStructSetData($tMax, 8, $minH + 14)
@@ -65,7 +59,7 @@ Func WM_GETMINMAXINFO($hwnd, $Msg, $wParam, $lParam) ; Ensure min gui size
 	BitAND($hwnd, $Msg, $wParam, $lParam) ; Satisfies AutoIT3 check -w 5
 EndFunc   ;==>WM_GETMINMAXINFO
 
-Func WordWrap($S, $nLimit = 88)
+Func WordWrap($S, $nLimit = 86)
 	Local $iFound, $sR = ""
 	While StringLen($S) > $nLimit
 		$iFound = StringInStr(StringLeft($S, $nLimit), " ", 0, -1)
@@ -81,10 +75,24 @@ Func WordWrap($S, $nLimit = 88)
 	Return StringLen($S) ? $sR & $S : StringTrimRight($sR, 2) ; Strip last @CRLF
 EndFunc   ;==>WordWrap
 
+Func StatusDisplay($sMsg, $Color = $COLOR_RED)
+  GUICtrlSetData($StatDisp, $sMSG)
+  Return GUICtrlSetBkColor($StatDisp, $Color)
+EndFunc
+
+Func sLine($A) ; Output for single match
+	If Not IsArray($A) Then Return '"' & $A & '"' & @CRLF
+	Local $I, $S = ""
+	For $I = 0 To UBound($A) - 1
+		$S &= '"' & $A[$I] & '", '
+	Next
+	Return "[" & StringTrimRight($S, 2) & "]" & @CRLF
+EndFunc
+
 Func RegExTest($InBox)
 	; Read text:
 	Local $sInText = GUICtrlRead($InBox)
-	Local $sUTF = ""
+	Local $sUTF = "" ; Utf test. Thanks DominiqueH
 	For $I = 1 To StringLen($sInText)
 		If AscW(StringMid($sInText, $I, 1)) > 255 Then
 			$sUTF = "(*UTF)"
@@ -93,13 +101,14 @@ Func RegExTest($InBox)
 	Next
 
 	; Read options:
-	Local $nOffset = GUICtrlRead($OffsetBox)
+	Local $Mode, $nOffset = GUICtrlRead($OffsetBox)
 	$nOffset = @error ? 1 : Int($nOffset)
-	Local $aMode = [GUICtrlRead($R0), GUICtrlRead($R1), GUICtrlRead($R2), GUICtrlRead($R3), GUICtrlRead($R4)]
-	Local $Mode = _ArraySearch($aMode, 1)
+	For $Mode = 0 to Ubound($aRadio) - 1
+		If GuiCtrlRead($aRadio[$Mode]) = $GUI_CHECKED Then ExitLoop
+	Next
 
-	Local $aaA, $hTimer = TimerInit()
-	$aaA = StringRegExp($sUTF & $sInText, GUICtrlRead($PatBox), $Mode, $nOffset)
+	Local $hTimer = TimerInit()
+	Local $aA = StringRegExp($sUTF & $sInText, GUICtrlRead($PatBox), $Mode, $nOffset)
 	Local $Err = @error, $Ext = @extended
 	GUICtrlSetData($TimDisp, Round(TimerDiff($hTimer), 2) & " ms")
 
@@ -108,47 +117,23 @@ Func RegExTest($InBox)
 	GUICtrlSetData($ExtDisp, $Ext)
 	Select ; StatusDisplay:
 		Case $Err = 1
-			GUICtrlSetData($StatDisp, "Array is invalid - No matches")
-			Return GUICtrlSetBkColor($StatDisp, $COLOR_RED)
+			Return StatusDisplay("Array is invalid - No matches")
 		Case $Err = 2
-			GUICtrlSetData($StatDisp, "Bad pattern @extended = offset of error in pattern")
-			Return GUICtrlSetBkColor($StatDisp, $COLOR_RED)
+			Return StatusDisplay("Bad pattern @extended = offset of error in pattern")
 	EndSelect
-	GUICtrlSetData($StatDisp, "Complete")
-	GUICtrlSetBkColor($StatDisp, $COLOR_LIME)
-	Local $sResult, $sTitle, $sExplain, $Alinea = @CRLF & @CRLF, $S = " "
-	Switch $Mode
-		Case 0 ; Logical match
-			$sTitle = $0Title
-			$sExplain = $0Returns & $S & $0Contains
-		Case 1 ; Match
-			$sTitle = $1Title
-			$sExplain = $1Returns & $S & $1Contains & ". However"
-		Case 2 ; Match + detail
-			$sTitle = $2Title
-			$sExplain = $1Returns & $S & $2Contains & $S & $2Parts
-		Case 3 ; All matches
-			$sTitle = $3Title
-			$sExplain = $1Returns & $S & $1Contains & ". However"
-		Case 4 ; All matches + details
-			$sTitle = $4Title
-			$sExplain = $3Returns & $S & $2Contains & $S & $2Parts
-	EndSwitch
-	$sResult = $sTitle & $Alinea & WordWrap($sExplain, 64) & ":" & $Alinea
-	If Not IsArray($aaA) Then ; Result -> Single value
-		$sResult &= $aaA ? "True = match found" : "False = no match found"
-	ElseIf IsArray($aaA[0]) Then ; Result -> array of arrays
-		For $I = 0 To UBound($aaA) - 1
-			$sResult &= $I & " => ["
-			Local $J, $aA = $aaA[$I]
-			For $J = 0 To UBound($aA) - 1
-				$sResult &= '"' & $aA[$J] & '", '
-			Next
-			$sResult = StringTrimRight($sResult, 2) & "]" & @CRLF
-		Next
-	Else ; Result -> array
-		For $I = 0 To UBound($aaA) - 1
-			$sResult &= $I & ' => "' & $aaA[$I] & '"' & @CRLF
+	StatusDisplay("Complete", $COLOR_LIME)
+	Local $Alinea = @CRLF & @CRLF
+	Local $sExplain = WordWrap($aReturns[$Mode] & ". " & $aContains[$Mode], 62)
+	Local $sResult = $aOption[$Mode] & $Alinea & $sExplain & ":" & $Alinea
+	If Not IsArray($aA) Then ; Result -> Single logical
+		$sResult &= $aA ? "True = " : "False = no "
+		Return GUICtrlSetData($OutDisp, $sResult & " match found")
+	EndIf
+	If $Mode<3 Then ; Single-line:
+		$sResult &= sLine($aA)
+	Else ; Multi-line:
+		For $I = 0 To UBound($aA) - 1
+			$sResult &= "[" & $I & "] = " & sLine($aA[$I])
 		Next
 	EndIf
 	GUICtrlSetData($OutDisp, $sResult)
@@ -156,21 +141,21 @@ EndFunc   ;==>RegExTest
 
 Func Example($aExample)
 	Local $sName = $aExample[0], $aM[6] ; Merge
-	$aM[0] = "Data to take in account such as the " & StringLower($sName)
+	$aM[0] = "Data to collect such as the " & StringLower($sName)
 	$aM[1] = "may come in different manners. There is a need to put"
 	$aM[2] = "and"
 	$aM[3] = "in an orderly fashion: a fact sheet. Formats used for data such as"
 	$aM[4] = "may vary per country. Edit the template as needed and add"
 	$aM[5] = "to your " & $sName & " list."
 	Local $I, $sMerge = "", $aTest = $aExample[2]
-	For $I = 0 To 5
+	For $I = 0 To Ubound($aTest) - 1
 		$sMerge &= $aM[$I] & " " & $aTest[$I] & " "
 	Next
 	Local $sResult = $sName & "s example" & @CRLF & @CRLF & WordWrap($sMerge) & @CRLF
 	GUICtrlSetData($EditBox, $sResult)
 	_GUICtrlTab_ActivateTab($idTab, 0) ; Ensure editbox is visible
 	_GUICtrlComboBox_SetEditText($PatBox, $aExample[1])
-	GUICtrlSetState($R4, $GUI_CHECKED) ; All matches + details
+	GUICtrlSetState($aRadio[4], $GUI_CHECKED) ; All matches + details
 	GUICtrlSetData($OffsetBox, 1)
 	RegExTest($EditBox)
 EndFunc   ;==>Example
@@ -178,13 +163,24 @@ EndFunc   ;==>Example
 Func Main()
 	Opt("GUIDataSeparatorChar", Chr(11)) ; VT sep in combo
 
+    ; Explanations:
+	Local $0R = "Returns a logical"
+    Local $1R = "Returns a single array", $3R = "Returns an array of an array"
+    Global $aReturns[5] = [$0R, $1R, $1R, $1R, $3R]
+	Local $0C = "The value indicates whether there is a match", $1C = "The first element "
+    Local $3C = "Each first element ", $4C = "of the inner array "
+	Local $1D = "should contain the full match. However", $2D = "contains the full match. "
+    Local $2E = "Subsequent elements are requested string parts (Perl/PHP style)"
+    Global $aContains[5] = [$0C, $1C & $1D, $1C & $2D & $2E, $3C & $1D, $3C & $4C & $2D & $2E]
+
 	; Example patterns:
 	Local $P0 = "([123]?\d*) (jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec) (\d\d(?:\d\d)*)" ; Date
-	Local $P1 = "(\d{3,4}(?:\s+|-|.)\d{6,7})" ; Phone#
+	Local $P1 = "(\d{3,4})(?:\s+|-|.)\d{6,7}" ; Phone#
 	Local $P2 = "(\p{Lu}\p{Ll}+)\s+(\p{Lu}\p{Ll}+)" ; Name
 	Local $P3 = "([012]\d)(?:\:|h)([012345]\d)?(?:\:|m)?([012345]\d)?s?" ; Time
 	Local $P4 = "((?:[\w_\-\.])+)@([\w-]+.(?:com|nl|org))" ; Mail address
 	Local $P5 = "(?:https?://)?+(?:[\w\-]+\.)*?([\w\-]+\.(info|org|com))" ; Website
+	; Thanks FritsW
 
 	; Data:
 	Local $aD0[6] = ["4 jan 2020", "17 apr 1997", "14 feb 2019", "25 dec 2021", "15 jul 2019"] ; Date
@@ -193,11 +189,12 @@ Func Main()
 	Local $aD3[6] = ["12:43:16", "18h35", "07:30", "10h", "15h30m17s"] ; Time
 	Local $aD4[6] = ["v.siebel@mail.com", "a_marie@live.com", "julia@hot.com", "sahim@alhan.nl", "kerkhof.bert@gmail.com"] ; Mail address
 	Local $aD5[6] = ["www.pcre.org", "fairfood.org", "https://www.danstools.com/", "regular-expressions.info", "childinstress.com"] ; Website
+	; Thanks JolandeS
 
     ; Combine:
     Local $aX0 = ["Date", $P0, $aD0], $aX1 = ["Phone number", $P1, $aD1]
 	Local $aX2 = ["Name", $P2, $aD2], $aX3 = ["Time", $P3, $aD3]
-	Local $aX4 = ["Mail adress", $P4, $aD4], $aX5 = ["Website", $P5, $aD5]
+	Local $aX4 = ["Mail adress", $P4, $aD4], $aX5 = ["Web address", $P5, $aD5]
 	Local $aaExample[6] = [$aX0, $aX1, $aX2, $aX3, $aX4, $aX5]
 
 	; Gui:
@@ -210,7 +207,6 @@ Func Main()
 
 	; Menu:
 	Local $I, $aXid[6], $mExample = GUICtrlCreateMenu("Examples")
-
 	For $I = 0 To UBound($aaExample) - 1
 		$aXid[$I] = GUICtrlCreateMenuItem(($aaExample[$I])[0], $mExample)
 	Next
@@ -257,18 +253,11 @@ Func Main()
 
 	; Options panel:
 	GUICtrlCreateGroup("Options", 10, 342, 141, 146)
-	$R0 = GUICtrlCreateRadio($0Title, 15, 361, 132, 18)
-	GUICtrlSetState($R0, $GUI_CHECKED)
-	GUICtrlSetTip(-1, $0Contains, $0Returns, $TIP_INFOICON, $TIP_BALLOON)
-	$R1 = GUICtrlCreateRadio($1Title, 15, 379, 132, 18)
-	GUICtrlSetTip(-1, $1Contains, $1Returns, $TIP_INFOICON, $TIP_BALLOON)
-	$R2 = GUICtrlCreateRadio($2Title, 15, 397, 132, 18)
-	Local $sRap = WordWrap($2Contains & " " & $2Parts, 64)
-	GUICtrlSetTip(-1, $sRap, $1Returns, $TIP_INFOICON, $TIP_BALLOON)
-	$R3 = GUICtrlCreateRadio($3Title, 15, 415, 132, 18)
-	GUICtrlSetTip(-1, $1Contains, $1Returns, $TIP_INFOICON, $TIP_BALLOON)
-	$R4 = GUICtrlCreateRadio($4Title, 15, 433, 132, 18)
-	GUICtrlSetTip(-1, $sRap, $3Returns, $TIP_INFOICON, $TIP_BALLOON)
+	For $I = 0 to Ubound($aRadio) - 1
+	  $aRadio[$I] = GUICtrlCreateRadio($aOption[$I], 15, 361 + $I*16, 132, 18)
+	  GUICtrlSetTip(-1, $aContains[$I], $aReturns[$I], $TIP_INFOICON, $TIP_BALLOON)
+    Next
+	GUICtrlSetState($aRadio[0], $GUI_CHECKED)
 
 	$OffsetBox = GUICtrlCreateInput("1", 15, 457, 40, 20)
 	$sTip = "Position to start the search"
@@ -330,7 +319,7 @@ Func Main()
 				GUICtrlSetState($PatBox, $GUI_FOCUS)
 			Case $iHelp ; Supports compilation in x32/x64 default mode:
 				Run(@ProgramFilesDir & "\AutoIt3\AutoIt3Help.exe StringRegExp")
-				If @error Then MsgBox($MB_SYSTEMMODAL, "error", "Help file not found")
+				If @error Then StatusDisplay("Error: AutoIT is not installed")
 			Case $GUI_EVENT_RESIZED ; Sync ruler:
 				GUICtrlSetPos($idRuler, 20 + ((WinGetClientSize($hGui))[0] - $minW) / 36)
 			Case $GUI_EVENT_CLOSE
